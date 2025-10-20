@@ -1,415 +1,460 @@
-"use client"
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useInView, useAnimation } from 'framer-motion';
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, useInView, useAnimation } from "framer-motion";
+import { FiArrowRight, FiLayers, FiMenu, FiPhone, FiMail, FiX, FiStar, FiCheck } from "react-icons/fi";
 import {
-  FiCode, FiMenu, FiArrowRight, FiCalendar,
-  FiLayers, FiZap, FiShield,
-  FiTrendingUp, FiUsers, FiDatabase, FiCloud, FiSmartphone,
-  FiCpu, FiCheckCircle, FiTarget
-} from 'react-icons/fi';
-import {
-  SiNextdotjs, SiReact, SiTypescript, SiTailwindcss, SiFastapi,
-  SiNodedotjs, SiSupabase, SiPostgresql, SiMysql, SiDocker,
-  SiVercel, SiNginx, SiExpo
-} from 'react-icons/si';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
-import Link from 'next/link';
-import { Rocket, TerminalIcon } from 'lucide-react';
+  SiReact, SiNodedotjs, SiPython, SiMongodb, SiFlutter, SiAndroid, SiNextdotjs, SiTypescript,
+  SiSupabase,
+  SiFlask,
+  SiFirebase,
+} from "react-icons/si";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { MdFlipCameraAndroid, MdWeb, MdDesktopMac } from "react-icons/md";
+import { TbBrandReactNative, TbBuildingStore } from "react-icons/tb";
+import { PhoneCall, Users, Clock, Award } from "lucide-react";
 
-const FadeInWhenVisible = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => {
+// Type Definitions
+interface FadeInProps {
+  children: React.ReactNode;
+  delay?: number;
+  direction?: "up" | "down" | "left" | "right";
+}
+
+interface FeatureCardProps {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  gradient: string;
+  onClick?: () => void;
+}
+
+interface CountUpProps {
+  end: number;
+  suffix?: string;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+}
+
+interface Project {
+  title: string;
+  link: string;
+  description: string;
+  tags: string[];
+}
+
+interface Plan {
+  name: string;
+  price: string;
+  features: string[];
+  popular?: boolean;
+}
+
+interface NavbarProps {
+  scrollTo: (id: string) => void;
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: (open: boolean) => void;
+}
+
+interface HeroProps {
+  scrollTo: (id: string) => void;
+}
+
+interface ContactProps {
+  formData: FormData;
+  setFormData: (data: FormData) => void;
+  handleSubmit: (data: FormData) => Promise<void>;
+  formStatus: string;
+}
+
+// Form Schema
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().optional(),
+  message: z.string().min(10, "Message must be at least 10 characters"),
+});
+
+// Enhanced Animation Component
+const FadeIn: React.FC<FadeInProps> = ({ children, delay = 0, direction = "up" }) => {
   const controls = useAnimation();
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
+    if (isInView) controls.start("visible");
   }, [isInView, controls]);
+
+  const directionVariants = {
+    up: { visible: { opacity: 1, y: 0 }, hidden: { opacity: 0, y: 40 } },
+    down: { visible: { opacity: 1, y: 0 }, hidden: { opacity: 0, y: -40 } },
+    left: { visible: { opacity: 1, x: 0 }, hidden: { opacity: 0, x: 40 } },
+    right: { visible: { opacity: 1, x: 0 }, hidden: { opacity: 0, x: -40 } },
+  };
 
   return (
     <motion.div
       ref={ref}
       animate={controls}
       initial="hidden"
-      transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
-      variants={{
-        visible: { opacity: 1, y: 0 },
-        hidden: { opacity: 0, y: 50 }
-      }}
+      transition={{ duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      variants={directionVariants[direction]}
     >
       {children}
     </motion.div>
   );
 };
 
-const CountUp = ({ end, prefix = '', suffix = '' }: { end: number; prefix?: string; suffix?: string }) => {
+// Enhanced Feature Card
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description, gradient, onClick }) => (
+  <motion.div 
+    whileHover={{ y: -8, scale: 1.02 }} 
+    transition={{ duration: 0.3, ease: "easeOut" }}
+    className="h-full"
+  >
+    <Card className="border-gray-200/70 hover:border-blue-200/50 hover:shadow-2xl transition-all duration-500 h-full bg-white/70 backdrop-blur-sm overflow-hidden group">
+      <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <CardContent className="p-8 relative z-10">
+        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+          <Icon className="text-white text-2xl" />
+        </div>
+        <CardTitle className="text-xl mb-3 font-bold text-gray-900">{title}</CardTitle>
+        <p className="text-gray-600 mb-6 leading-relaxed">{description}</p>
+        {onClick && (
+          <Button 
+            variant="ghost" 
+            onClick={onClick} 
+            className="p-0 text-blue-600 hover:text-blue-700 font-medium group/btn"
+          >
+            Learn more 
+            <FiArrowRight className="ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  </motion.div>
+);
+
+// Count Up Animation
+const CountUp: React.FC<CountUpProps> = ({ end, suffix = "" }) => {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
   useEffect(() => {
-    if (isInView) {
-      let start = 0;
-      const duration = 2000;
-      const increment = end / (duration / 16);
-
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= end) {
-          setCount(end);
-          clearInterval(timer);
-        } else {
-          setCount(Math.floor(start));
-        }
-      }, 16);
-
-      return () => clearInterval(timer);
-    }
+    if (!isInView) return;
+    let start = 0;
+    const duration = 2000;
+    const increment = end / (duration / 16);
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        setCount(end);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+    return () => clearInterval(timer);
   }, [isInView, end]);
 
-  return (
-    <div ref={ref} className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-      {prefix}{count}{suffix}
-    </div>
-  );
+  return <span ref={ref}>{count}{suffix}</span>;
 };
 
-const App = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '', phone: '' });
-  const [formStatus, setFormStatus] = useState('');
+const ProjectTownApp: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({ name: "", email: "", message: "", phone: "" });
+  const [formStatus, setFormStatus] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setMobileMenuOpen(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormStatus('sending');
-
+  const handleSubmit = async (data: FormData) => {
+    setFormStatus("sending");
     try {
-      const response = await fetch('https://formspree.io/f/xrbpjrvn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const response = await fetch("https://formspree.io/f/xrbpjrvn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
-
       if (response.ok) {
-        setFormStatus('success');
-        setFormData({ name: '', email: '', message: '', phone: '' });
+        setFormStatus("success");
+        setFormData({ name: "", email: "", message: "", phone: "" });
+        setTimeout(() => setFormStatus(""), 5000);
       } else {
-        setFormStatus('error');
+        setFormStatus("error");
       }
-    } catch (error) {
-      setFormStatus('error');
+    } catch {
+      setFormStatus("error");
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-950 via-indigo-950/30 to-slate-950 text-slate-100 min-h-screen">
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/30 via-transparent to-transparent pointer-events-none" />
-      <div className="relative z-10">
-        <Navbar scrollToSection={scrollToSection} />
-        <Hero scrollToSection={scrollToSection} />
-        <About />
-        <Products scrollToSection={scrollToSection} />
-        <TechStack />
-        <Services />
-        <Stats />
-        <Team />
-        <Contact
-          formData={formData}
-          setFormData={setFormData}
-          handleSubmit={handleSubmit}
-          formStatus={formStatus}
-        />
-        <Footer scrollToSection={scrollToSection} />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/20 to-indigo-50/10">
+      <Navbar scrollTo={scrollTo} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
+      <Hero scrollTo={scrollTo} />
+      <Services scrollTo={scrollTo} />
+      <Projects />
+      <Technologies />
+      <Stats />
+      <Testimonials />
+      <Pricing />
+      <Contact formData={formData} setFormData={setFormData} handleSubmit={handleSubmit} formStatus={formStatus} />
+      <Footer />
     </div>
   );
 };
 
-const Navbar = ({ scrollToSection }: { scrollToSection: (id: string) => void }) => {
+const Navbar: React.FC<NavbarProps> = ({ scrollTo, mobileMenuOpen, setMobileMenuOpen }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Home', id: 'home' },
-    { name: 'About', id: 'about' },
-    { name: 'Products', id: 'products' },
-    { name: 'Tech Stack', id: 'tech-stack' },
-    { name: 'Services', id: 'services' },
-    { name: 'Contact', id: 'contact' }
-  ];
+  const links = ["Home", "Services", "Projects", "Technologies", "Pricing", "Contact"];
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-slate-950/90 backdrop-blur-2xl border-b border-indigo-500/20 shadow-2xl shadow-indigo-500/10' : 'bg-transparent'}`}
+    <nav
+      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+        scrolled 
+          ? "bg-white/95 backdrop-blur-xl shadow-sm py-2" 
+          : "bg-white/80 backdrop-blur-lg py-4"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 lg:h-20">
-          <motion.div
-            className="flex items-center gap-2 cursor-pointer group"
-            onClick={() => scrollToSection('home')}
-            whileHover={{ scale: 1.05 }}
+        <div className="flex justify-between items-center">
+          <motion.button 
+            onClick={() => scrollTo("home")} 
+            whileHover={{ scale: 1.05 }} 
             whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-3"
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 blur-md opacity-60 group-hover:opacity-80 transition-opacity" />
-              <FiCode className="relative text-2xl text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <TbBuildingStore className="text-white text-xl" />
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
-              Acharya Technologies
-            </span>
-          </motion.div>
+            <div className="hidden sm:block text-left">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                ProjectTown
+              </h1>
+              <p className="text-xs text-gray-500 font-medium">Academic Excellence</p>
+            </div>
+          </motion.button>
 
-          <div className="hidden lg:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <motion.button
-                key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className="text-slate-300 hover:text-indigo-300 transition-all duration-300 text-sm font-medium relative group px-3 py-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+          <div className="hidden lg:flex items-center gap-8">
+            {links.map((link) => (
+              <Button
+                key={link}
+                variant="ghost"
+                onClick={() => scrollTo(link.toLowerCase())}
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300 relative group"
               >
-                {link.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 group-hover:w-full transition-all duration-500" />
-              </motion.button>
+                {link}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300" />
+              </Button>
             ))}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                onClick={() => scrollTo("contact")} 
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
+              >
+                Get Quote
+              </Button>
+            </motion.div>
           </div>
 
-          <Sheet>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                <FiMenu className="text-xl" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-slate-950/95 backdrop-blur-2xl border-indigo-500/30">
-              <div className="flex flex-col gap-4 mt-10">
-                {navLinks.map((link, i) => (
-                  <motion.button
-                    key={link.id}
-                    onClick={() => scrollToSection(link.id)}
-                    className="text-slate-300 hover:text-indigo-300 transition-colors text-base font-medium text-left"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                  >
-                    {link.name}
-                  </motion.button>
-                ))}
-              </div>
-            </SheetContent>
-          </Sheet>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
+            >
+              {mobileMenuOpen ? <FiX className="text-xl" /> : <FiMenu className="text-xl" />}
+            </Button>
+          </motion.div>
         </div>
+
+        <motion.div 
+          initial={false} 
+          animate={{ height: mobileMenuOpen ? "auto" : 0 }} 
+          className="lg:hidden overflow-hidden"
+        >
+          <div className="py-4 space-y-2 border-t border-gray-100 mt-4">
+            {links.map((link) => (
+              <Button
+                key={link}
+                variant="ghost"
+                onClick={() => scrollTo(link.toLowerCase())}
+                className="block w-full text-left px-4 py-3 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
+              >
+                {link}
+              </Button>
+            ))}
+            <Button 
+              onClick={() => scrollTo("contact")} 
+              className="w-full mt-2 bg-gradient-to-r from-blue-600 to-indigo-600"
+            >
+              Get Quote
+            </Button>
+          </div>
+        </motion.div>
       </div>
-    </motion.nav>
+    </nav>
   );
 };
 
-const Hero = ({ scrollToSection }: { scrollToSection: (id: string) => void }) => {
-  return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-indigo-950 to-gray-950" />
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: Math.random() * 250 + 50,
-              height: Math.random() * 250 + 50,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: `radial-gradient(circle, ${Math.random() > 0.5 ? 'rgba(99, 102, 241, 0.15)' : 'rgba(168, 85, 247, 0.15)'} 0%, transparent 70%)`,
-            }}
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.2, 0.5, 0.2],
-              x: [0, Math.random() * 80 - 40, 0],
-              y: [0, Math.random() * 80 - 40, 0],
-            }}
-            transition={{
-              duration: 20 + Math.random() * 10,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-24 pb-16">
+const Hero: React.FC<HeroProps> = ({ scrollTo }) => (
+  <section id="home" className="min-h-screen flex items-center justify-center pt-16 px-4 relative overflow-hidden">
+    {/* Background Elements */}
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/30" />
+    <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl" />
+    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-200/20 rounded-full blur-3xl" />
+    
+    <div className="max-w-6xl mx-auto text-center relative z-10">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.8 }}
+      >
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl mb-8 border border-blue-100 shadow-lg shadow-blue-100/50"
         >
-          <motion.div
-            className="inline-block mb-4"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <div className="px-4 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 backdrop-blur-md">
-              <span className="text-xs text-indigo-300 font-semibold">MSME Registered • 1+ Year of Excellence</span>
-            </div>
-          </motion.div>
-
-          <motion.h1
-            className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          >
-            Pioneering the Future of
-            <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Digital Innovation
-            </span>
-          </motion.h1>
-
-          <motion.p
-            className="text-lg text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            Delivering bespoke software solutions, cutting-edge products, and transformative digital strategies to propel businesses forward in a competitive landscape.
-          </motion.p>
-
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={() => scrollToSection('products')}
-                className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-base group border-0 shadow-xl shadow-indigo-500/30"
-              >
-                <span className="relative z-10 flex items-center">
-                  Explore TestForge
-                  <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={() => scrollToSection('products')}
-                variant="outline"
-                className="relative border-2 border-indigo-500/40 text-black hover:bg-indigo-500/10 hover:border-indigo-500/60 hover:text-white px-8 py-6 text-base group backdrop-blur-md overflow-hidden transition-all duration-300"
-              >
-                <span className="relative z-10 flex items-center">
-                  Discover ProjectTown
-                  <motion.div
-                    className="ml-2"
-                    initial={{ x: 0 }}
-                    whileHover={{ x: 4 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  >
-                    <FiArrowRight />
-                  </motion.div>
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-900/40 to-indigo-900 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-              </Button>
-            </motion.div>
-          </motion.div>
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-sm font-semibold text-gray-700">15+ Projects Delivered • 24/7 Support</span>
+          <Award className="w-4 h-4 text-blue-600" />
         </motion.div>
-      </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="w-5 h-8 rounded-full border-2 border-indigo-400/40 flex items-start justify-center p-1.5"
-        >
-          <motion.div
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-1 h-1 rounded-full bg-indigo-400"
-          />
-        </motion.div>
-      </div>
-    </section>
-  );
-};
+        <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-8 leading-tight">
+          Premium
+          <br />
+          <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Academic Projects
+          </span>
+        </h1>
 
-const About = () => {
-  const values = [
+        <p className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+          &quote;Empower your academic success with complete source code, professional documentation, and expert guidance.&quote;
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={() => scrollTo("services")}
+              className="group bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-6 text-lg shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
+              size="lg"
+            >
+              Explore Services
+              <FiArrowRight className="ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link href="tel:8551900826" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full px-8 py-6 text-lg border-2" size="lg">
+                <PhoneCall className="mr-3" />
+                Call Now
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+          {[
+            { value: 15, suffix: "+", label: "Projects", icon: FiLayers },
+            { value: 98, suffix: "%", label: "Success Rate", icon: Award },
+            { value: 48, suffix: "hrs", label: "Delivery", icon: Clock },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + index * 0.1 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 bg-white/80 backdrop-blur-sm rounded-2xl border border-blue-100 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <stat.icon className="text-2xl text-blue-600" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                <CountUp end={stat.value} suffix={stat.suffix} />
+              </div>
+              <p className="text-sm text-gray-600 font-medium">{stat.label}</p>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  </section>
+);
+
+const Services: React.FC<HeroProps> = ({ scrollTo }) => {
+  const services: FeatureCardProps[] = [
     {
-      icon: FiTarget,
-      title: 'Precision',
-      description: 'Unwavering commitment to detail in code, design, and execution for flawless outcomes'
+      icon: MdWeb,
+      title: "Web Applications",
+      description: "Full-stack solutions with React, Node.js, and modern frameworks. Responsive design with cutting-edge technologies.",
+      gradient: "from-blue-500 to-cyan-600",
     },
     {
-      icon: FiZap,
-      title: 'Innovation',
-      description: 'Harnessing emerging technologies to deliver groundbreaking solutions'
+      icon: MdFlipCameraAndroid,
+      title: "Mobile Apps",
+      description: "Native Android and cross-platform Flutter applications. Smooth UX and modern design patterns.",
+      gradient: "from-emerald-500 to-teal-600",
     },
     {
-      icon: FiShield,
-      title: 'Resilience',
-      description: 'Crafting durable, scalable systems engineered for long-term success'
-    }
+      icon: MdDesktopMac,
+      title: "Desktop Software",
+      description: "Java Swing, C# WPF, and Electron desktop applications. Professional-grade desktop solutions.",
+      gradient: "from-purple-500 to-pink-600",
+    },
+    {
+      icon: FiLayers,
+      title: "AI/ML Projects",
+      description: "Python-based ML solutions with TensorFlow and NLP. Intelligent systems and data-driven applications.",
+      gradient: "from-orange-500 to-red-600",
+    },
   ];
 
   return (
-    <section id="about" className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-indigo-950 to-gray-900" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <FadeInWhenVisible>
-          <div className="text-center mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Who <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">We Are</span>
+    <section id="services" className="py-24 px-4 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50" />
+      <div className="max-w-7xl mx-auto relative z-10">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold mb-6">
+              Our{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Services
+              </span>
             </h2>
-            <p className="text-slate-300 text-base lg:text-lg max-w-3xl mx-auto leading-relaxed">
-              Acharya Technologies is an MSME-registered firm with over a year of specialized experience in custom software development and innovative product creation. Serving small to mid-sized enterprises, we&apos;ve generated ₹40k in revenue, focusing on scalable solutions that drive efficiency and growth. Our team combines technical prowess with strategic insight to deliver measurable results.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              &quote;From concept to deployment, we deliver comprehensive projects that excel in academic evaluations.&quote;
             </p>
           </div>
-        </FadeInWhenVisible>
+        </FadeIn>
 
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {values.map((value, i) => (
-            <FadeInWhenVisible key={i} delay={i * 0.2}>
-              <motion.div
-                whileHover={{ scale: 1.05, y: -8 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="h-full"
-              >
-                <Card className="bg-slate-900/60 backdrop-blur-md border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-500 h-full group overflow-hidden rounded-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="p-6 lg:p-8 relative z-10">
-                    <div className="relative mb-4">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 blur-lg opacity-30 group-hover:opacity-50 transition-opacity" />
-                      <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
-                        <value.icon className="text-3xl text-indigo-400" />
-                      </div>
-                    </div>
-                    <CardTitle className="text-indigo-300 text-xl mb-3">{value.title}</CardTitle>
-                    <CardDescription className="text-slate-300 text-sm leading-relaxed">
-                      {value.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            </FadeInWhenVisible>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {services.map((service, i) => (
+            <FadeIn key={service.title} delay={i * 0.1}>
+              <FeatureCard {...service} onClick={() => scrollTo("contact")} />
+            </FadeIn>
           ))}
         </div>
       </div>
@@ -417,235 +462,197 @@ const About = () => {
   );
 };
 
-const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }) => {
-  const testForgeFeatures = [
-    { icon: FiZap, title: 'Smart Exam Setup', desc: 'Intuitive configuration for diverse exam formats' },
-    { icon: FiCalendar, title: 'Dynamic Timetable', desc: 'Automated scheduling with intelligent conflict resolution' },
-    { icon: FiUsers, title: 'Automated Seating', desc: 'Efficient, AI-driven seating arrangements' },
-    { icon: FiCheckCircle, title: 'Digital eMarksheet', desc: 'Secure, real-time result generation and distribution' },
-    { icon: FiTrendingUp, title: 'Advanced Analytics', desc: 'In-depth performance insights and reporting' },
-    { icon: FiCpu, title: 'Workflow Engine', desc: 'End-to-end automation of exam processes' }
-  ];
+const Projects: React.FC = () => {
+  const [activeTab, setActiveTab] = useState("web");
 
-  const projectTownFeatures = [
-    { icon: FiLayers, title: 'Project Marketplace', desc: 'Curated selection of custom and prebuilt projects' },
-    { icon: FiCheckCircle, title: 'Task Management', desc: 'Robust tools for task assignment and tracking' },
-    { icon: FiUsers, title: 'Team Collaboration', desc: 'Seamless real-time communication and teamwork' },
-    { icon: FiTarget, title: 'Milestone Tracking', desc: 'Visual progress monitoring with alerts' },
-    { icon: FiDatabase, title: 'Resource Management', desc: 'Centralized repository for project assets' },
-    { icon: FiTrendingUp, title: 'Performance Analytics', desc: 'Comprehensive metrics for project optimization' }
-  ];
+  const projects: Record<string, Project[]> = {
+    web: [
+      {
+        title: "AutoAssure – AI Car Marketplace",
+        link: "https://autoassure.vercel.app/",
+        description: "India's premier car marketplace with real-time auctions, AI chatbot, and secure payments.",
+        tags: ["Next.js", "Supabase", "AI", "Razorpay"],
+      },
+      {
+        title: "TestForge - Exam Platform",
+        link: "https://testforge.vercel.app/",
+        description: "Comprehensive exam conduction platform with MSBTE compliance and automated reporting.",
+        tags: ["React", "Node.js", "MongoDB"],
+      },
+    ],
+    mobile: [
+      {
+        title: "CrimeReport – Security System",
+        link: "https://crime-report-beta.vercel.app/",
+        description: "Flutter-based crime reporting system with real-time tracking and police coordination.",
+        tags: ["Flutter", "Firebase", "Web"],
+      },
+    ],
+    ai: [
+      {
+        title: "HireSphere – AI Career Planner",
+        link: "https://hiresphere-gamma.vercel.app/",
+        description: "AI-driven career navigation with personalized learning paths and success tracking.",
+        tags: ["AI", "Next.js", "Gemini"],
+      },
+      {
+        title: "Travzi – Travel Planner",
+        link: "/projects/travzi",
+        description: "Intelligent itinerary generator with real-time insights and business optimization.",
+        tags: ["AI", "React", "Maps"],
+      },
+    ],
+  };
 
   return (
-    <section id="products" className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-bl from-gray-950 via-indigo-950 to-gray-900" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <FadeInWhenVisible>
-          <div className="text-center mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Our <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Products</span>
+    <section id="projects" className="py-24 px-4 bg-gradient-to-b from-gray-50 to-white relative">
+      <div className="max-w-7xl mx-auto">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold mb-6">
+              Featured{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Projects
+              </span>
             </h2>
-            <p className="text-slate-300 text-base lg:text-lg max-w-2xl mx-auto">
-              Cutting-edge solutions engineered to streamline operations and foster innovation
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              &quote;15+ verified projects designed to boost your academic success and impress your evaluators.&quote;
             </p>
           </div>
-        </FadeInWhenVisible>
+        </FadeIn>
 
-        <Tabs defaultValue="testforge" className="w-full">
-          <TabsList className="relative grid w-full max-w-sm mx-auto grid-cols-2 mb-12 bg-slate-900/70 border border-indigo-500/30 p-1.5 rounded-2xl backdrop-blur-xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 opacity-0 transition-opacity duration-300" />
-
-            <TabsTrigger
-              value="testforge"
-              className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/25 text-slate-300 hover:text-indigo-300 font-medium rounded-xl transition-all duration-300 py-2.5 data-[state=active]:scale-105 group"
-            >
-              <span className="relative z-10">TestForge</span>
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl -inset-1 opacity-0 group-hover:opacity-100 blur-sm"
-                initial={{ scale: 0 }}
-                whileHover={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              />
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="projectTown"
-              className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/25 text-slate-300 hover:text-indigo-300 font-medium rounded-xl transition-all duration-300 py-2.5 data-[state=active]:scale-105 group"
-            >
-              <span className="relative z-10">ProjectTown</span>
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl -inset-1 opacity-0 group-hover:opacity-100 blur-sm"
-                initial={{ scale: 0 }}
-                whileHover={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              />
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="testforge">
-            <FadeInWhenVisible>
-              <Card className="bg-gradient-to-br from-slate-900/70 to-slate-900/40 border-indigo-500/40 mb-10 backdrop-blur-md overflow-hidden rounded-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
-                <CardHeader className="p-8 lg:p-10 relative z-10">
-                  <CardTitle className="text-indigo-300 text-2xl lg:text-3xl flex items-center gap-3 mb-3">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-500/30 flex items-center justify-center border border-indigo-500/40">
-                      <FiCpu className="text-2xl text-indigo-400" />
-                    </div>
-                    TestForge
-                  </CardTitle>
-                  <CardDescription className="text-base text-slate-300 leading-relaxed">
-                    A revolutionary platform automating the complete examination lifecycle, from setup to analytics.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </FadeInWhenVisible>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {testForgeFeatures.map((feature, i) => (
-                <FadeInWhenVisible key={i} delay={i * 0.1}>
-                  <motion.div
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <Card className="bg-slate-900/60 backdrop-blur-md border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-500 h-full group overflow-hidden rounded-2xl">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <CardHeader className="p-6 lg:p-8 relative z-10">
-                        <feature.icon className="text-3xl text-indigo-400 mb-3" />
-                        <CardTitle className="text-indigo-300 text-lg mb-2">{feature.title}</CardTitle>
-                        <CardDescription className="text-slate-300 text-sm leading-relaxed">
-                          {feature.desc}
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </motion.div>
-                </FadeInWhenVisible>
+        <FadeIn delay={0.2}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-4xl mx-auto mb-12">
+            <TabsList className="grid grid-cols-3 bg-white/80 backdrop-blur-sm p-2 rounded-2xl border border-gray-200 shadow-lg">
+              {["web", "mobile", "ai"].map((tab) => (
+                <TabsTrigger 
+                  key={tab} 
+                  value={tab} 
+                  className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300"
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </TabsTrigger>
               ))}
-            </div>
+            </TabsList>
+            
+            {["web", "mobile", "ai"].map((tab) => (
+              <TabsContent key={tab} value={tab} className="mt-8">
+                <div className="grid sm:grid-cols-2 gap-8">
+                  {projects[tab].map((project, i) => (
+                    <FadeIn key={project.title} delay={i * 0.15}>
+                      <Card className="border-gray-200/70 hover:border-blue-200/50 hover:shadow-2xl transition-all duration-500 group overflow-hidden">
+                        <CardContent className="p-8">
+                          <div className="flex justify-between items-start mb-4">
+                            <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                              {project.title}
+                            </CardTitle>
+                            <div className="flex gap-1">
+                              {[...Array(5)].map((_, j) => (
+                                <FiStar key={j} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-600 mb-6 leading-relaxed">{project.description}</p>
+                          
+                          <div className="flex flex-wrap gap-2 mb-6">
+                            {project.tags.map((tag) => (
+                              <span 
+                                key={tag} 
+                                className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full border border-blue-100"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-sm text-gray-500 mb-6">
+                            <span className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              24–48 hrs
+                            </span>
+                            <span className="font-bold text-blue-600 text-lg">₹4000</span>
+                          </div>
+                          
+                          <Button asChild variant="outline" className="w-full group/btn border-2">
+                            <Link href={project.link}>
+                              View Project Details
+                              <FiArrowRight className="ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                            </Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </FadeIn>
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </FadeIn>
 
-            <div className="text-center mt-12">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-base group border-0 shadow-xl shadow-indigo-500/30">
-                  <Link href="https://testforge.software" className="flex items-center">
-                    Explore TestForge
-                    <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
-              </motion.div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="projectTown">
-            <FadeInWhenVisible>
-              <Card className="bg-gradient-to-br from-slate-900/70 to-slate-900/40 border-indigo-500/40 mb-10 backdrop-blur-md overflow-hidden rounded-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
-                <CardHeader className="p-8 lg:p-10 relative z-10">
-                  <CardTitle className="text-indigo-300 text-2xl lg:text-3xl flex items-center gap-3 mb-3">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-500/30 flex items-center justify-center border border-indigo-500/40">
-                      <FiLayers className="text-2xl text-indigo-400" />
-                    </div>
-                    ProjectTown
-                  </CardTitle>
-                  <CardDescription className="text-base text-slate-300 leading-relaxed">
-                    An advanced e-commerce ecosystem for academic projects, bridging students with premium custom and ready-made solutions.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </FadeInWhenVisible>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projectTownFeatures.map((feature, i) => (
-                <FadeInWhenVisible key={i} delay={i * 0.1}>
-                  <motion.div
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <Card className="bg-slate-900/60 backdrop-blur-md border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-500 h-full group overflow-hidden rounded-2xl">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <CardHeader className="p-6 lg:p-8 relative z-10">
-                        <feature.icon className="text-3xl text-indigo-400 mb-3" />
-                        <CardTitle className="text-indigo-300 text-lg mb-2">{feature.title}</CardTitle>
-                        <CardDescription className="text-slate-300 text-sm leading-relaxed">
-                          {feature.desc}
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </motion.div>
-                </FadeInWhenVisible>
-              ))}
-            </div>
-            <div className="text-center mt-12">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-base group border-0 shadow-xl shadow-indigo-500/30">
-                  <Link href="https://projecttown.vercel.app" className="flex items-center">
-                    Explore ProjectTown
-                    <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
-              </motion.div>
-            </div>
-
-          </TabsContent>
-        </Tabs>
+        <FadeIn delay={0.4}>
+          <div className="text-center">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-6 text-lg shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
+                size="lg"
+              >
+                Request Custom Project
+                <TbBuildingStore className="ml-3" />
+              </Button>
+            </motion.div>
+          </div>
+        </FadeIn>
       </div>
     </section>
   );
 };
 
-const TechStack = () => {
-  const technologies = [
-    { icon: SiNextdotjs, name: 'Next.js', color: '#ffffff' },
-    { icon: SiReact, name: 'React', color: '#61DAFB' },
-    { icon: SiTypescript, name: 'TypeScript', color: '#3178C6' },
-    { icon: SiTailwindcss, name: 'Tailwind CSS', color: '#06B6D4' },
-    { icon: FiLayers, name: 'Shadcn/UI', color: '#8b5cf6' },
-    { icon: SiFastapi, name: 'FastAPI', color: '#009688' },
-    { icon: SiNodedotjs, name: 'Node.js', color: '#339933' },
-    { icon: SiSupabase, name: 'Supabase', color: '#3ECF8E' },
-    { icon: SiPostgresql, name: 'PostgreSQL', color: '#4169E1' },
-    { icon: SiMysql, name: 'MySQL', color: '#4479A1' },
-    { icon: FiShield, name: 'Clerk', color: '#8b5cf6' },
-    { icon: FiUsers, name: 'OAuth', color: '#8b5cf6' },
-    { icon: SiDocker, name: 'Docker', color: '#2496ED' },
-    { icon: SiVercel, name: 'Vercel', color: '#ffffff' },
-    { icon: SiNginx, name: 'Nginx', color: '#009639' },
-    { icon: SiExpo, name: 'Expo', color: '#ffffff' },
-    { icon: FiSmartphone, name: 'React Native', color: '#61DAFB' }
+const Technologies: React.FC = () => {
+  const techs: { name: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
+    { name: "React", icon: SiReact, color: "text-cyan-500" },
+    { name: "Node.js", icon: SiNodedotjs, color: "text-green-600" },
+    { name: "Python", icon: SiPython, color: "text-blue-500" },
+    { name: "MongoDB", icon: SiMongodb, color: "text-green-500" },
+    { name: "Flutter", icon: SiFlutter, color: "text-blue-400" },
+    { name: "Android", icon: SiAndroid, color: "text-green-500" },
+    { name: "Next.js", icon: SiNextdotjs, color: "text-gray-900" },
+    { name: "TypeScript", icon: SiTypescript, color: "text-blue-600" },
+    { name: "Supabase", icon: SiSupabase, color: "text-green-500" },
+    { name: "Flask", icon: SiFlask, color: "text-gray-800" },
+    { name: "Firebase", icon: SiFirebase, color: "text-amber-500" },
+    { name: "React Native", icon: TbBrandReactNative, color: "text-blue-500" },
   ];
 
   return (
-    <section id="tech-stack" className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-indigo-950 to-gray-900" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <FadeInWhenVisible>
-          <div className="text-center mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Tech <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Stack</span>
+    <section id="technologies" className="py-24 px-4 bg-white relative">
+      <div className="max-w-7xl mx-auto">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold mb-6">
+              Our{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Tech Stack
+              </span>
             </h2>
-            <p className="text-slate-300 text-base lg:text-lg max-w-2xl mx-auto">
-              Utilizing premier technologies to engineer robust, efficient, and future-proof applications
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              &quote;Cutting-edge technologies powering robust, scalable, and modern academic solutions.&quote;
             </p>
           </div>
-        </FadeInWhenVisible>
+        </FadeIn>
 
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 lg:gap-6">
-          {technologies.map((tech, i) => (
-            <FadeInWhenVisible key={i} delay={i * 0.05}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+          {techs.map((tech, i) => (
+            <FadeIn key={tech.name} delay={i * 0.05} direction="up">
               <motion.div
                 whileHover={{ scale: 1.1, y: -8 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white/80 backdrop-blur-sm border border-gray-200/70 rounded-2xl p-8 flex flex-col items-center gap-4 hover:shadow-2xl hover:border-blue-200/50 transition-all duration-300 group"
               >
-                <Card className="bg-slate-900/60 backdrop-blur-md border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-500 h-full group overflow-hidden rounded-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardContent className="p-6 flex flex-col items-center justify-center text-center relative z-10">
-                    <tech.icon
-                      className="text-4xl mb-3 transition-transform duration-300 group-hover:scale-110"
-                      style={{ color: tech.color }}
-                    />
-                    <p className="text-xs text-slate-300 font-medium">{tech.name}</p>
-                  </CardContent>
-                </Card>
+                <tech.icon className={`text-5xl ${tech.color} group-hover:scale-110 transition-transform duration-300`} />
+                <span className="text-sm font-semibold text-gray-700 text-center">{tech.name}</span>
               </motion.div>
-            </FadeInWhenVisible>
+            </FadeIn>
           ))}
         </div>
       </div>
@@ -653,121 +660,31 @@ const TechStack = () => {
   );
 };
 
-const Services = () => {
-  const services = [
-    {
-      title: 'Product Design & Strategy',
-      icon: FiTarget,
-      items: ['User Experience Research', 'System Architecture Planning', 'Strategic Product Roadmapping']
-    },
-    {
-      title: 'Full-Stack Development',
-      icon: FiCode,
-      items: ['Frontend Engineering', 'Backend Development', 'Database Optimization']
-    },
-    {
-      title: 'Mobile App Development',
-      icon: FiSmartphone,
-      items: ['iOS & Android Apps', 'Cross-Platform Solutions', 'Native Performance Tuning']
-    },
-    {
-      title: 'Cloud & Automation',
-      icon: FiCloud,
-      items: ['DevOps Implementation', 'Cloud Infrastructure Management', 'AI & Automation Integration']
-    }
+const Stats: React.FC = () => {
+  const stats: { icon: React.ComponentType<{ className?: string }>; value: number; suffix: string; label: string }[] = [
+    { icon: FiLayers, value: 15, suffix: "+", label: "Projects Delivered" },
+    { icon: Users, value: 100, suffix: "+", label: "Students Helped" },
+    { icon: Award, value: 98, suffix: "%", label: "Success Rate" },
+    { icon: Clock, value: 48, suffix: "hrs", label: "Avg Delivery" },
   ];
 
   return (
-    <section id="services" className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-bl from-gray-950 via-indigo-950 to-gray-900" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <FadeInWhenVisible>
-          <div className="text-center mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Our <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Expertise</span>
-            </h2>
-            <p className="text-slate-300 text-base lg:text-lg max-w-2xl mx-auto">
-              Tailored technology services designed to address your unique business challenges and goals
-            </p>
-          </div>
-        </FadeInWhenVisible>
-
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-          {services.map((service, i) => (
-            <FadeInWhenVisible key={i} delay={i * 0.2}>
-              <motion.div
-                whileHover={{ scale: 1.03, y: -6 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Card className="bg-gradient-to-br from-slate-900/70 to-slate-900/40 backdrop-blur-md border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-500 h-full group overflow-hidden rounded-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="p-8 lg:p-10 relative z-10">
-                    <div className="relative mb-4">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 blur-lg opacity-30 group-hover:opacity-50 transition-opacity" />
-                      <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
-                        <service.icon className="text-3xl text-indigo-400" />
-                      </div>
-                    </div>
-                    <CardTitle className="text-indigo-300 text-xl lg:text-2xl mb-4">{service.title}</CardTitle>
-                    <div className="space-y-3">
-                      {service.items.map((item, j) => (
-                        <div key={j} className="flex items-center gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
-                          <span className="text-slate-300 text-sm">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            </FadeInWhenVisible>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const Stats = () => {
-  const stats = [
-    { value: 40, prefix: "₹", suffix: 'K+', label: 'Revenue Past Year', icon: FiTrendingUp },
-    { value: 15, suffix: "+", label: 'Projects Delivered', icon: FiCheckCircle },
-    { value: 10, suffix: "+", label: 'Happy Clients', icon: FiUsers },
-    { value: 5, label: 'Team Members', icon: FiCode }
-  ];
-
-  return (
-    <section className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-indigo-950 to-gray-900" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+    <section className="py-24 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden">
+      <div className="absolute inset-0 bg-black/10" />
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
-            <FadeInWhenVisible key={i} delay={i * 0.15}>
-              <motion.div
-                whileHover={{ scale: 1.05, y: -6 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Card className="bg-gradient-to-br from-slate-900/70 to-slate-900/40 backdrop-blur-md border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-500 h-full group overflow-hidden rounded-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="text-center p-8 lg:p-10 relative z-10">
-                    <div className="relative mb-4 inline-block">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
-                      <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30 mx-auto">
-                        <stat.icon className="text-3xl text-indigo-400" />
-                      </div>
-                    </div>
-                    <CountUp
-                      end={stat.value}
-                      prefix={stat.prefix || ''}
-                      suffix={stat.suffix || ''}
-                    />
-                    <CardDescription className="text-slate-300 mt-3 text-base">
-                      {stat.label}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            </FadeInWhenVisible>
+            <FadeIn key={stat.label} delay={i * 0.1} direction="up">
+              <div className="text-center text-white">
+                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/20">
+                  <stat.icon className="text-3xl text-white opacity-90" />
+                </div>
+                <div className="text-5xl font-bold mb-3">
+                  <CountUp end={stat.value} suffix={stat.suffix} />
+                </div>
+                <p className="text-blue-100 text-lg font-medium">{stat.label}</p>
+              </div>
+            </FadeIn>
           ))}
         </div>
       </div>
@@ -775,80 +692,71 @@ const Stats = () => {
   );
 };
 
-const Team = () => {
-  const teamMembers = [
-    {
-      name: 'Indrajeet',
-      role: 'Full-Stack Architect',
-      initials: 'I',
-      phoneNumber: '+91 8551900826',
-      description: 'Orchestrating system architecture and leading full-stack initiatives with precision',
-      icon: TerminalIcon
+const Testimonials: React.FC = () => {
+  const testimonials: { name: string; course: string; text: string; avatar: string; rating: number }[] = [
+    { 
+      name: "Rahul S.", 
+      course: "B.Tech Computer Science", 
+      text: "Received my web application project within 24 hours. The code was clean, documentation thorough, and scored 9.8/10 in my final evaluation!", 
+      avatar: "RS", 
+      rating: 5 
     },
-    {
-      name: 'Tyler Durden',
-      role: 'Product Engineer',
-      initials: 'T',
-      description: 'Spearheading product development and engineering innovation for optimal outcomes',
-      icon: FiLayers
-    }
+    { 
+      name: "Priya P.", 
+      course: "MCA Final Year", 
+      text: "The Flutter mobile app they delivered was flawless. Great support throughout the project and excellent viva preparation guidance.", 
+      avatar: "PP", 
+      rating: 5 
+    },
+    { 
+      name: "Amit K.", 
+      course: "BCA Data Science", 
+      text: "Custom AI/ML project impressed my professor. Complete source code with LaTeX report helped me understand every aspect clearly.", 
+      avatar: "AK", 
+      rating: 5 
+    },
   ];
 
   return (
-    <section className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-bl from-gray-950 via-indigo-950 to-gray-900" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <FadeInWhenVisible>
-          <div className="text-center mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Leadership <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Team</span>
+    <section className="py-24 px-4 bg-gradient-to-b from-white to-gray-50 relative">
+      <div className="max-w-7xl mx-auto">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold mb-6">
+              Student{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Success Stories
+              </span>
             </h2>
-            <p className="text-slate-300 text-base lg:text-lg max-w-xl mx-auto">
-              A dedicated team of experts committed to excellence and innovation
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              &quote;Join hundreds of students who achieved academic excellence with our projects.&quote;
             </p>
           </div>
-        </FadeInWhenVisible>
+        </FadeIn>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {teamMembers.map((member, i) => (
-            <FadeInWhenVisible key={i} delay={i * 0.2}>
-              <motion.div
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Card className="bg-slate-900/60 backdrop-blur-md border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-500 overflow-hidden group h-full rounded-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="text-center relative z-10 p-8 lg:p-10">
-                    <div className="flex justify-center mb-4">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 blur-xl opacity-50 group-hover:opacity-70 transition-opacity" />
-                        <Avatar className="relative w-20 h-20 border-2 border-indigo-500/40 group-hover:border-indigo-500/60 transition-colors">
-                          <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-2xl font-bold">
-                            {member.initials}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {testimonials.map((t, i) => (
+            <FadeIn key={t.name} delay={i * 0.15}>
+              <Card className="border-gray-200/70 hover:border-blue-200/50 hover:shadow-2xl transition-all duration-500 group">
+                <CardContent className="p-8">
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(t.rating)].map((_, j) => (
+                      <FiStar key={j} className="w-5 h-5 text-amber-400 fill-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-600 text-lg mb-8 leading-relaxed italic">&quote;{t.text}&quote;</p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      {t.avatar}
                     </div>
-                    <CardTitle className="text-indigo-300 text-xl flex items-center justify-center gap-2 mb-1">
-                      <member.icon className="text-indigo-400 text-lg" />
-                      {member.name}
-                    </CardTitle>
-                    <p className="text-slate-300 text-base mb-3">{member.role}</p>
-                    <CardDescription className="text-slate-300 mt-3 text-sm leading-relaxed">
-                      {member.description}
-                    </CardDescription>
-                    {member.phoneNumber && (
-                      <Link
-                        href={`tel:${member.phoneNumber}`}
-                        className="text-indigo-400 hover:text-indigo-300 mt-3 inline-block transition-colors text-sm"
-                      >
-                        {member.phoneNumber}
-                      </Link>
-                    )}
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            </FadeInWhenVisible>
+                    <div>
+                      <p className="font-bold text-gray-900 text-lg">{t.name}</p>
+                      <p className="text-gray-500 text-sm">{t.course}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </FadeIn>
           ))}
         </div>
       </div>
@@ -856,154 +764,337 @@ const Team = () => {
   );
 };
 
-const Contact = ({
-  formData,
-  setFormData,
-  handleSubmit,
-  formStatus
-}: {
-  formData: { name: string; email: string; message: string; phone: string };
-  setFormData: React.Dispatch<React.SetStateAction<{ name: string; email: string; message: string; phone: string }>>;
-  handleSubmit: (e: React.FormEvent) => void;
-  formStatus: string;
-}) => {
+const Pricing: React.FC = () => {
+  const plans: Plan[] = [
+    {
+      name: "Essential",
+      price: "₹4000",
+      features: [
+        "Complete Source Code",
+        "Basic Documentation", 
+        "48-hour Delivery",
+        "Email Support",
+        "Setup Instructions"
+      ],
+    },
+    {
+      name: "Complete",
+      price: "₹5000",
+      features: [
+        "Complete Source Code",
+        "Professional LaTeX Report", 
+        "Full Setup Assistance",
+        "Viva Preparation Guide",
+        "Priority 24/7 Support",
+        "1 Week Revision Support",
+        "Deployment Assistance"
+      ],
+      popular: true,
+    },
+  ];
+
   return (
-    <section id="contact" className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-indigo-950 to-gray-900" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <FadeInWhenVisible>
-          <div className="text-center mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Get in <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Touch</span>
+    <section id="pricing" className="py-24 px-4 bg-white relative">
+      <div className="max-w-7xl mx-auto">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold mb-6">
+              Simple{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Pricing
+              </span>
             </h2>
-            <p className="text-slate-300 text-base lg:text-lg max-w-2xl mx-auto">
-              Ready to transform your ideas into reality? Contact us for consultations, collaborations, or inquiries.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              &quote;Affordable plans designed to help you succeed in your academic journey.&quote;
             </p>
           </div>
-        </FadeInWhenVisible>
+        </FadeIn>
 
-        <FadeInWhenVisible>
-          <motion.form
-            onSubmit={handleSubmit}
-            className="max-w-2xl mx-auto bg-slate-900/60 backdrop-blur-md border border-indigo-500/30 rounded-3xl p-8 lg:p-10 overflow-hidden group relative"
-            whileHover={{ scale: 1.01 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative z-10 space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
-                  Name
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Your Name"
-                  required
-                  className="bg-slate-800/60 border-indigo-500/40 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-indigo-500 h-12 text-base rounded-xl"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Your Email"
-                  required
-                  className="bg-slate-800/60 border-indigo-500/40 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-indigo-500 h-12 text-base rounded-xl"
-                />
-              </div>
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-slate-300 mb-2">
-                  Phone
-                </label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="Your Phone"
-                  required
-                  className="bg-slate-800/60 border-indigo-500/40 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-indigo-500 h-12 text-base rounded-xl"
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-slate-300 mb-2">
-                  Message
-                </label>
-                <Textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Your Message"
-                  required
-                  className="bg-slate-800/60 border-indigo-500/40 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-indigo-500 text-base rounded-xl min-h-32"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-base w-full border-0 shadow-xl shadow-indigo-500/30"
-                disabled={formStatus === 'sending'}
-              >
-                {formStatus === 'sending' ? 'Sending...' : 'Send Message'}
-              </Button>
-              {formStatus === 'success' && (
-                <motion.p
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 text-green-400 text-center text-base"
-                >
-                  Thank you! Your message has been sent successfully.
-                </motion.p>
-              )}
-              {formStatus === 'error' && (
-                <motion.p
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 text-red-400 text-center text-base"
-                >
-                  An error occurred. Please try again later.
-                </motion.p>
-              )}
-            </div>
-          </motion.form>
-        </FadeInWhenVisible>
+        <div className="grid sm:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {plans.map((plan, i) => (
+            <FadeIn key={plan.name} delay={i * 0.2} direction="up">
+              <Card className={`relative border-2 transition-all duration-500 group hover:shadow-2xl ${
+                plan.popular 
+                  ? "border-blue-500 shadow-xl scale-105" 
+                  : "border-gray-200/70 hover:border-blue-200/50"
+              }`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
+                    Most Popular
+                  </div>
+                )}
+                <CardHeader className="pb-6">
+                  <CardTitle className="text-3xl font-bold text-gray-900 text-center">{plan.name}</CardTitle>
+                  <div className="text-5xl font-bold text-gray-900 text-center mt-4">
+                    {plan.price}
+                    <span className="text-lg text-gray-500 font-normal">/project</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-4 mb-8">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-3 text-gray-600">
+                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <FiCheck className="w-4 h-4 text-green-600" />
+                        </div>
+                        <span className="text-lg">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      variant={plan.popular ? 'default' : 'outline'}
+                      className={`w-full py-6 text-lg font-semibold border-2 ${
+                        plan.popular 
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40' 
+                          : 'hover:border-blue-600 hover:text-blue-600'
+                      }`}
+                      size="lg"
+                    >
+                      Choose {plan.name}
+                    </Button>
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </FadeIn>
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
-const Footer = ({ scrollToSection }: { scrollToSection: (id: string) => void }) => {
-  return (
-    <footer className="py-10 bg-slate-950 border-t border-indigo-500/20 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <motion.div
-          className="flex items-center gap-2 cursor-pointer group"
-          onClick={() => scrollToSection('home')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 blur-md opacity-60 group-hover:opacity-80 transition-opacity" />
-            <FiCode className="relative text-2xl text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-          </div>
-          <span className="text-lg font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
-            Acharya Technologies
-          </span>
-        </motion.div>
+const Contact: React.FC<ContactProps> = ({ formData, setFormData, handleSubmit, formStatus }) => {
+  const { register, handleSubmit: formSubmit, formState: { errors }, reset } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: formData,
+  });
 
-        <p className="text-slate-400 text-xs">
-          &copy; {new Date().getFullYear()} Acharya Technologies. All rights reserved.
+  const onSubmit = (data: FormData) => {
+    handleSubmit(data);
+    if (formStatus === "success") reset();
+  };
+
+  return (
+    <section id="contact" className="py-24 px-4 bg-gradient-to-b from-gray-50 to-blue-50/30 relative">
+      <div className="max-w-6xl mx-auto">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold mb-6">
+              Start Your{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Project
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              &quote;Let&apos;s build your dream project together. Get a free quote and expert consultation.&quote;
+            </p>
+          </div>
+        </FadeIn>
+
+        <div className="grid lg:grid-cols-2 gap-12">
+          <FadeIn delay={0.2} direction="right">
+            <Card className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white border-0 shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-black/10" />
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-2xl font-bold">Get In Touch</CardTitle>
+                <p className="text-blue-100 text-lg mt-2">
+                  We&apos;re here to help you succeed in your academic journey.
+                </p>
+              </CardHeader>
+              <CardContent className="relative z-10 space-y-6">
+                <a href="tel:8551900826" className="flex items-center gap-4 p-4 bg-white/10 rounded-2xl hover:bg-white/20 transition-all duration-300 group">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FiPhone className="text-xl" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">8551 900 826</p>
+                    <p className="text-blue-100 text-sm">Call us anytime</p>
+                  </div>
+                </a>
+                <a href="mailto:omkar.kulkarni.3174@gmail.com" className="flex items-center gap-4 p-4 bg-white/10 rounded-2xl hover:bg-white/20 transition-all duration-300 group">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FiMail className="text-xl" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">Email Us</p>
+                    <p className="text-blue-100 text-sm break-all">omkar.kulkarni.3174@gmail.com</p>
+                  </div>
+                </a>
+                <div className="p-6 bg-white/10 rounded-2xl mt-8">
+                  <h4 className="font-bold text-lg mb-3">Why Choose Us?</h4>
+                  <ul className="space-y-2 text-blue-100">
+                    <li className="flex items-center gap-2">
+                      <FiCheck className="text-green-300" />
+                      24/7 Student Support
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <FiCheck className="text-green-300" />
+                      Free Viva Preparation
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <FiCheck className="text-green-300" />
+                      Complete Documentation
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <FiCheck className="text-green-300" />
+                      On-time Delivery Guarantee
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </FadeIn>
+
+          <FadeIn delay={0.4} direction="left">
+            <Card className="border-gray-200/70 shadow-2xl hover:shadow-3xl transition-all duration-500">
+              <CardContent className="p-8">
+                <form onSubmit={formSubmit(onSubmit)} className="space-y-6">
+                  <div>
+                    <Input 
+                      placeholder="Your Full Name" 
+                      {...register("name")} 
+                      className="h-14 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl"
+                    />
+                    {errors.name && <p className="text-red-600 text-sm mt-2 font-medium">{errors.name.message}</p>}
+                  </div>
+                  <div>
+                    <Input 
+                      type="email" 
+                      placeholder="Your Email Address" 
+                      {...register("email")} 
+                      className="h-14 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl"
+                    />
+                    {errors.email && <p className="text-red-600 text-sm mt-2 font-medium">{errors.email.message}</p>}
+                  </div>
+                  <div>
+                    <Input 
+                      type="tel" 
+                      placeholder="Your Phone Number (Optional)" 
+                      {...register("phone")} 
+                      className="h-14 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl"
+                    />
+                  </div>
+                  <div>
+                    <Textarea 
+                      placeholder="Tell us about your project requirements, deadline, and any specific technologies you prefer..." 
+                      {...register("message")} 
+                      rows={6}
+                      className="text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl resize-none"
+                    />
+                    {errors.message && <p className="text-red-600 text-sm mt-2 font-medium">{errors.message.message}</p>}
+                  </div>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      type="submit"
+                      disabled={formStatus === "sending"}
+                      className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-lg font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 rounded-xl"
+                      size="lg"
+                    >
+                      {formStatus === "sending" ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
+                          Sending Your Request...
+                        </>
+                      ) : (
+                        "Get Free Quote & Consultation"
+                      )}
+                    </Button>
+                  </motion.div>
+                  {formStatus === "success" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-green-50 border border-green-200 text-green-700 p-6 rounded-2xl text-lg text-center font-medium"
+                    >
+                      ✓ Thank you! We&apos;ll contact you within 30 minutes.
+                    </motion.div>
+                  )}
+                  {formStatus === "error" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl text-lg text-center font-medium"
+                    >
+                      ✗ Something went wrong. Please try again or call us directly.
+                    </motion.div>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+          </FadeIn>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Footer: React.FC = () => (
+  <footer className="bg-gray-900 text-white py-16 px-4 relative overflow-hidden">
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20" />
+    <div className="max-w-7xl mx-auto relative z-10">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="col-span-2">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <TbBuildingStore className="text-white text-xl" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                ProjectTown
+              </h3>
+              <p className="text-sm text-gray-400 font-medium">Academic Excellence</p>
+            </div>
+          </div>
+          <p className="text-lg text-gray-400 mb-6 max-w-md leading-relaxed">
+             &quote;Empowering students with premium academic projects, complete source code, and expert guidance for academic success.&quote;
+          </p>
+          <div className="flex gap-4">
+            <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer">
+              <FiPhone className="text-xl text-blue-400" />
+            </div>
+            <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer">
+              <FiMail className="text-xl text-blue-400" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-lg mb-6 text-white">Our Services</h4>
+          <ul className="space-y-3 text-gray-400">
+            <li className="hover:text-white transition-colors cursor-pointer">Web Development</li>
+            <li className="hover:text-white transition-colors cursor-pointer">Mobile Applications</li>
+            <li className="hover:text-white transition-colors cursor-pointer">Desktop Software</li>
+            <li className="hover:text-white transition-colors cursor-pointer">AI/ML Projects</li>
+            <li className="hover:text-white transition-colors cursor-pointer">Academic Reports</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-lg mb-6 text-white">Support</h4>
+          <ul className="space-y-3 text-gray-400">
+            <li className="hover:text-white transition-colors cursor-pointer">24/7 Assistance</li>
+            <li className="hover:text-white transition-colors cursor-pointer">Free Explanations</li>
+            <li className="hover:text-white transition-colors cursor-pointer">Documentation</li>
+            <li className="hover:text-white transition-colors cursor-pointer">Viva Preparation</li>
+            <li className="hover:text-white transition-colors cursor-pointer">Revision Support</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-800 pt-8 text-center">
+        <p className="text-gray-400 text-lg">
+          &copy; 2025 ProjectTown. All rights reserved.{" "}
+          <span className="text-blue-400">
+            Powered by{" "}
+            <a href="https://acharya.is-local.org" className="underline hover:text-blue-300 transition-colors">
+              Acharya Technologies
+            </a>
+          </span>
         </p>
       </div>
-    </footer>
-  );
-};
+    </div>
+  </footer>
+);
 
-export default App;
+export default ProjectTownApp;
