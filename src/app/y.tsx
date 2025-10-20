@@ -317,7 +317,7 @@ const Hero = ({ scrollToSection }: { scrollToSection: (id: string) => void }) =>
                 className="relative border-2 border-indigo-500/40 text-black hover:bg-indigo-500/10 hover:border-indigo-500/60 hover:text-white px-8 py-6 text-base group backdrop-blur-md overflow-hidden transition-all duration-300"
               >
                 <span className="relative z-10 flex items-center">
-                  Discover ProjectTown
+                  Discover ProjectNexus
                   <motion.div
                     className="ml-2"
                     initial={{ x: 0 }}
@@ -427,7 +427,7 @@ const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }
     { icon: FiCpu, title: 'Workflow Engine', desc: 'End-to-end automation of exam processes' }
   ];
 
-  const projectTownFeatures = [
+  const projectNexusFeatures = [
     { icon: FiLayers, title: 'Project Marketplace', desc: 'Curated selection of custom and prebuilt projects' },
     { icon: FiCheckCircle, title: 'Task Management', desc: 'Robust tools for task assignment and tracking' },
     { icon: FiUsers, title: 'Team Collaboration', desc: 'Seamless real-time communication and teamwork' },
@@ -469,10 +469,10 @@ const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }
             </TabsTrigger>
 
             <TabsTrigger
-              value="projectTown"
+              value="projectnexus"
               className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/25 text-slate-300 hover:text-indigo-300 font-medium rounded-xl transition-all duration-300 py-2.5 data-[state=active]:scale-105 group"
             >
-              <span className="relative z-10">ProjectTown</span>
+              <span className="relative z-10">ProjectNexus</span>
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl -inset-1 opacity-0 group-hover:opacity-100 blur-sm"
                 initial={{ scale: 0 }}
@@ -534,7 +534,7 @@ const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }
             </div>
           </TabsContent>
 
-          <TabsContent value="projectTown">
+          <TabsContent value="projectnexus">
             <FadeInWhenVisible>
               <Card className="bg-gradient-to-br from-slate-900/70 to-slate-900/40 border-indigo-500/40 mb-10 backdrop-blur-md overflow-hidden rounded-2xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
@@ -543,7 +543,7 @@ const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-500/30 flex items-center justify-center border border-indigo-500/40">
                       <FiLayers className="text-2xl text-indigo-400" />
                     </div>
-                    ProjectTown
+                    ProjectNexus
                   </CardTitle>
                   <CardDescription className="text-base text-slate-300 leading-relaxed">
                     An advanced e-commerce ecosystem for academic projects, bridging students with premium custom and ready-made solutions.
@@ -553,7 +553,7 @@ const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }
             </FadeInWhenVisible>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projectTownFeatures.map((feature, i) => (
+              {projectNexusFeatures.map((feature, i) => (
                 <FadeInWhenVisible key={i} delay={i * 0.1}>
                   <motion.div
                     whileHover={{ y: -8, scale: 1.02 }}
@@ -576,15 +576,15 @@ const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }
 
             <div className="text-center mt-12">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-base group border-0 shadow-xl shadow-indigo-500/30">
-                  <Link href="https://projecttown.vercel.app" className="flex items-center">
-                    Explore ProjectTown
-                    <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                <Button
+                  onClick={() => scrollToSection('contact')}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-base group border-0 shadow-xl shadow-indigo-500/30 cursor-pointer"
+                >
+                  Coming Soon
+                  <Rocket className="ml-2 text-lg group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform duration-200" />
                 </Button>
               </motion.div>
             </div>
-
           </TabsContent>
         </Tabs>
       </div>
