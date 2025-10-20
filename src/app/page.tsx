@@ -573,7 +573,6 @@ const Products = ({ scrollToSection }: { scrollToSection: (id: string) => void }
                 </FadeInWhenVisible>
               ))}
             </div>
-
             <div className="text-center mt-12">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-base group border-0 shadow-xl shadow-indigo-500/30">
