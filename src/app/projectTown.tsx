@@ -352,7 +352,7 @@ const Hero: React.FC<HeroProps> = ({ scrollTo }) => (
         </h1>
 
         <p className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
-          &quote;Empower your academic success with complete source code, professional documentation, and expert guidance.&quote;
+          &quot;Empower your academic success with complete source code, professional documentation, and expert guidance.&quot;
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -445,7 +445,7 @@ const Services: React.FC<HeroProps> = ({ scrollTo }) => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              &quote;From concept to deployment, we deliver comprehensive projects that excel in academic evaluations.&quote;
+              &quot;From concept to deployment, we deliver comprehensive projects that excel in academic evaluations.&quot;
             </p>
           </div>
         </FadeIn>
@@ -516,7 +516,7 @@ const Projects: React.FC = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              &quote;15+ verified projects designed to boost your academic success and impress your evaluators.&quote;
+              &quot;15+ verified projects designed to boost your academic success and impress your evaluators.&quot;
             </p>
           </div>
         </FadeIn>
@@ -636,7 +636,7 @@ const Technologies: React.FC = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              &quote;Cutting-edge technologies powering robust, scalable, and modern academic solutions.&quote;
+              &quot;Cutting-edge technologies powering robust, scalable, and modern academic solutions.&quot;
             </p>
           </div>
         </FadeIn>
@@ -729,7 +729,7 @@ const Testimonials: React.FC = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              &quote;Join hundreds of students who achieved academic excellence with our projects.&quote;
+              &quot;Join hundreds of students who achieved academic excellence with our projects.&quot;
             </p>
           </div>
         </FadeIn>
@@ -744,7 +744,7 @@ const Testimonials: React.FC = () => {
                       <FiStar key={j} className="w-5 h-5 text-amber-400 fill-amber-400" />
                     ))}
                   </div>
-                  <p className="text-gray-600 text-lg mb-8 leading-relaxed italic">&quote;{t.text}&quote;</p>
+                  <p className="text-gray-600 text-lg mb-8 leading-relaxed italic">&quot;{t.text}&quot;</p>
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
                       {t.avatar}
@@ -805,7 +805,7 @@ const Pricing: React.FC = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              &quote;Affordable plans designed to help you succeed in your academic journey.&quote;
+              &quot;Affordable plans designed to help you succeed in your academic journey.&quot;
             </p>
           </div>
         </FadeIn>
@@ -887,7 +887,7 @@ const Contact: React.FC<ContactProps> = ({ formData, setFormData, handleSubmit, 
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              &quote;Let&apos;s build your dream project together. Get a free quote and expert consultation.&quote;
+              &quot;Let&apos;s build your dream project together. Get a free quote and expert consultation.&quot;
             </p>
           </div>
         </FadeIn>
@@ -1047,7 +1047,7 @@ const Footer: React.FC = () => (
             </div>
           </div>
           <p className="text-lg text-gray-400 mb-6 max-w-md leading-relaxed">
-             &quote;Empowering students with premium academic projects, complete source code, and expert guidance for academic success.&quote;
+             &quot;Empowering students with premium academic projects, complete source code, and expert guidance for academic success.&quot;
           </p>
           <div className="flex gap-4">
             <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer">
